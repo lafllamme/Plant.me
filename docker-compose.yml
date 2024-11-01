@@ -1,0 +1,13 @@
+version: '3.9'
+
+services:
+  plant-assistant:
+    build: .
+    container_name: plant-assistant
+    ports:
+      - "8000:8000"
+    environment:
+      - HF_API_TOKEN=${HF_API_TOKEN}
+    restart: unless-stopped
+    volumes:
+      - .:/app

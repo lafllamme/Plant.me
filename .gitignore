@@ -1,0 +1,8 @@
+# Add directories and files to ignore
+
+#IDE
+.env
+.idea
+
+#Python
+ __pycache__
