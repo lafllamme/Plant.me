@@ -1,11 +1,6 @@
-Here’s an improved English version of your `README.md`:
-
----
-
 # Plant Assistant
 
-A local Plant Assistant that runs on your Mac and uses LangChain and a Large Language Model (LLM) to provide plant care recommendations based on various parameters.
-
+A local Plant Assistant that runs on your Mac and uses LangChain and a Large Language Model (LLM) to provide plant care recommendations based on various parameters. 🌱
 ## Prerequisites
 
 - Docker
