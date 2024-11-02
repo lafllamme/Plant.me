@@ -29,7 +29,7 @@ Make sure you have the following installed:
 1. **Clone the Repository:**
 
     ```bash
-    git clone https://github.com/your-username/plant-assistant.git
+    git clone https://github.com/lafllamme/Plant.me.git
     cd plant-assistant
     ```
 
