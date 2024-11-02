@@ -1,7 +1,7 @@
 # Makefile for managing Docker Compose commands
 
 # Variables
-COMPOSE=docker-compose
+COMPOSE=@docker compose
 IMAGE=plant-assistant:latest
 SERVICE=plant-assistant
 
@@ -48,10 +48,10 @@ down:
 # View logs for all services
 logs:
 	@echo "Fetching logs for all services..."
-	$(COMPOSE) logs
+	$(COMPOSE) logs -f
 
 # Follow logs for all services with timestamps
-logs-follow:
+logs-time:
 	@echo "Following logs with timestamps..."
 	$(COMPOSE) logs -f -t
 

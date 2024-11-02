@@ -1,23 +1,25 @@
-# Verwende ein offizielles Python-Image als Basis, das ARM unterstützt
+# Use an official Python image that supports ARM architecture
 FROM python:3.9-slim
 
-# Installiere notwendige System-Abhängigkeiten
-RUN apt-get update && apt-get install -y \
+# Set the working directory
+WORKDIR /app
+
+# Install necessary system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Setze das Arbeitsverzeichnis
-WORKDIR /app
-
-# Kopiere die Anforderungen und installiere sie
+# Copy only the requirements file to leverage Docker cache
 COPY requirements.txt .
+
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Kopiere den restlichen Anwendungscode
-COPY . .
+# Copy the rest of the application code
+#COPY . .
 
-# Exponiere den Port, auf dem die API laufen wird
+# Expose the port the app runs on
 EXPOSE 8000
 
-# Starte die API mit Uvicorn
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Start the API with Uvicorn
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
