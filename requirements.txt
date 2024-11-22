@@ -1,5 +1,7 @@
 fastapi
-uvicorn
-langchain
+uvicorn[standard]
 transformers
 torch
+pydantic
+huggingface_hub
+protobuf

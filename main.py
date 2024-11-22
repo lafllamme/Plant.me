@@ -1,13 +1,49 @@
+import logging
+import os
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
-import json
-import os
 
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+# Define the model path from environment variables
+MODEL_NAME = os.getenv("MODEL_NAME", "mistralai/Mistral-7B-v0.3")
+MODELS_DIR = os.getenv("MODELS_DIR", "/app/models")
+MODEL_PATH = os.path.join(MODELS_DIR, MODEL_NAME)
+
+# Check if MPS (Metal Performance Shaders) is available for Apple Silicon GPUs
+if torch.backends.mps.is_available():
+    device = torch.device("mps")
+elif torch.cuda.is_available():
+    device = torch.device("cuda")
+else:
+    device = torch.device("cpu")
+logger.debug(f"Using device: {device}")
+
+# Initialize the FastAPI app
 app = FastAPI()
 
-class PlantRequest(BaseModel):
+# Load tokenizer and model from the pre-downloaded model path
+logger.info("Loading tokenizer...")
+tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH, local_files_only=True)
+
+logger.info("Loading model...")
+model = AutoModelForCausalLM.from_pretrained(
+    MODEL_PATH,
+    local_files_only=True,
+    torch_dtype=torch.float16 if device.type != 'cpu' else torch.float32,
+    device_map='auto' if device.type != 'cpu' else None
+)
+
+# Move model to device if not using device_map
+if device.type == 'cpu':
+    model.to(device)
+
+# Define the data model for input
+class PlantInput(BaseModel):
     plant_name: str
     plant_type: str
     season: str
@@ -16,120 +52,54 @@ class PlantRequest(BaseModel):
     location: str
     light_conditions: str
 
-# Hugging Face API Token aus Umgebungsvariablen
-HF_API_TOKEN = os.getenv("HF_API_TOKEN")
-
-# Lade das Modell und den Tokenizer von Hugging Face
-model_name = "gpt2-medium"  # Verwende gpt2-medium für bessere Ergebnisse
-tokenizer = AutoTokenizer.from_pretrained(model_name, token=HF_API_TOKEN)
-model = AutoModelForCausalLM.from_pretrained(model_name, token=HF_API_TOKEN)
-model.eval()
-
-# Definiere die Templates für die Prompts
-validation_template = (
-    "Validiere die folgenden Daten zur Pflanze:\n"
-    "Name: {plant_name}\n"
-    "Art: {plant_type}\n"
-    "Jahreszeit: {season}\n"
-    "Temperatur: {temperature}°C\n"
-    "Feuchtigkeit: {humidity}%\n"
-    "Standort: {location}\n"
-    "Lichtverhältnisse: {light_conditions}\n"
-    "Antwort nur mit 'Validiert' oder 'Nicht validiert'."
-)
-
-identification_template = (
-    "Identifiziere die Pflanze basierend auf dem Namen:\n"
-    "Name: {plant_name}\n"
-    "Antwort nur mit dem wissenschaftlichen Namen."
-)
-
-recommendation_template = (
-    "Generiere Pflegeempfehlungen für die Pflanze basierend auf den folgenden Daten:\n"
-    "Name: {plant_name}\n"
-    "Art: {plant_type}\n"
-    "Jahreszeit: {season}\n"
-    "Temperatur: {temperature}°C\n"
-    "Feuchtigkeit: {humidity}%\n"
-    "Standort: {location}\n"
-    "Lichtverhältnisse: {light_conditions}\n"
-    "Antwort als JSON mit Feldern: 'watering_schedule', 'health_status'."
-)
-
-def create_prompt(template, **kwargs):
-    return template.format(**kwargs)
+def generate_recommendation(prompt):
+    inputs = tokenizer(prompt, return_tensors="pt")
+    inputs = {key: value.to(device) for key, value in inputs.items()}
+    outputs = model.generate(
+        **inputs,
+        max_new_tokens=512,
+        num_beams=5,
+        early_stopping=True,
+        no_repeat_ngram_size=2
+    )
+    generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    # Remove the prompt from the generated text
+    response = generated_text[len(prompt):].strip()
+    return response
 
 @app.post("/plant-assistant")
-def plant_assistant(request: PlantRequest):
+async def get_plant_recommendation(plant_input: PlantInput):
+    logger.debug(f"Received input: {plant_input}")
+
+    # Create the improved prompt with extended instructions
+    prompt = (
+        "You are an expert plant care assistant AI specializing in providing detailed and personalized care advice based on the given plant information. "
+        "Your response should assess the plant's health status, provide a precise watering schedule, suggest the next watering time, and offer additional care tips. "
+        "Ensure that the advice is specific to the plant species and considers the provided environmental conditions. "
+        "Avoid irrelevant information and keep the response professional and informative.\n\n"
+        "Plant Information:\n"
+        f"- Plant Name: {plant_input.plant_name}\n"
+        f"- Plant Type: {plant_input.plant_type}\n"
+        f"- Season: {plant_input.season}\n"
+        f"- Temperature: {plant_input.temperature}°C\n"
+        f"- Humidity: {plant_input.humidity}%\n"
+        f"- Location: {plant_input.location}\n"
+        f"- Light Conditions: {plant_input.light_conditions}\n\n"
+        "Please provide the following details:\n"
+        "1. **Health Status**: Assess the current health status of the plant based on the information provided.\n"
+        "2. **Watering Schedule**: Recommend how often the plant should be watered.\n"
+        "3. **Next Watering Time**: Suggest when the next watering should occur.\n"
+        "4. **Additional Care Tips**: Offer any additional advice for caring for this plant.\n"
+    )
+    logger.debug(f"Generated prompt: {prompt}")
+
+    # Generate the recommendation
     try:
-        # Bestimme das Gerät (MPS für M1/M2 Macs, ansonsten CPU)
-        device = torch.device("mps" if torch.has_mps else "cpu")
-        model.to(device)
-
-        # Schritt 1: Validierung
-        validation_prompt = create_prompt(validation_template, **request.dict())
-        inputs = tokenizer(validation_prompt, return_tensors="pt").to(device)
-        with torch.no_grad():
-            outputs = model.generate(
-                **inputs,
-                max_new_tokens=20,  # Begrenze die neuen Tokens
-                temperature=0.7,
-                top_p=0.9,
-                num_return_sequences=1,
-                eos_token_id=tokenizer.eos_token_id
-            )
-        validation_result = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
-
-        # Schritt 2: Identifikation
-        identification_prompt = create_prompt(identification_template, **request.dict())
-        inputs = tokenizer(identification_prompt, return_tensors="pt").to(device)
-        with torch.no_grad():
-            outputs = model.generate(
-                **inputs,
-                max_new_tokens=20,  # Begrenze die neuen Tokens
-                temperature=0.7,
-                top_p=0.9,
-                num_return_sequences=1,
-                eos_token_id=tokenizer.eos_token_id
-            )
-        identification_result = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
-
-        # Schritt 3: Empfehlung
-        recommendation_prompt = create_prompt(recommendation_template, **request.dict())
-        inputs = tokenizer(recommendation_prompt, return_tensors="pt").to(device)
-        with torch.no_grad():
-            outputs = model.generate(
-                **inputs,
-                max_new_tokens=200,  # Erhöhe die neuen Tokens auf 200
-                temperature=0.7,
-                top_p=0.9,
-                num_return_sequences=1,
-                eos_token_id=tokenizer.eos_token_id
-            )
-        recommendation_result = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
-        print(recommendation_result)
-
-        # Versuch, die Empfehlung als JSON zu parsen
-        try:
-            recommendation_json = json.loads(recommendation_result)
-        except json.JSONDecodeError:
-            recommendation_json = {"watering_schedule": recommendation_result, "health_status": "Unbekannt"}
-
-        # Strukturierte JSON-Antwort
-        response = {
-            "plant_name": request.plant_name,
-            "plant_type": request.plant_type,
-            "season": request.season,
-            "temperature": request.temperature,
-            "humidity": request.humidity,
-            "location": request.location,
-            "light_conditions": request.light_conditions,
-            "validation": validation_result,
-            "identification": identification_result,
-            "recommendation": recommendation_json
-        }
-
-        return response
-
+        generated_text = generate_recommendation(prompt)
+        logger.debug(f"Generated text: {generated_text}")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error during text generation: {e}")
+        raise HTTPException(status_code=500, detail="Error generating plant care recommendation.")
+
+    # Return the generated text
+    return {"recommendation": generated_text}
