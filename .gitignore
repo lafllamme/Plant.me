@@ -3,6 +3,8 @@
 #IDE
 .env
 .idea
+/*.iml
+
 
 #Python
  __pycache__
