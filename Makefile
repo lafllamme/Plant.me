@@ -35,6 +35,10 @@ up:
 	@echo "Bringing up services..."
 	$(COMPOSE) up -d
 
+enter:
+	@echo "Entering the container..."
+	$(COMPOSE) exec $(SERVICE) bash
+
 # Restart the services
 restart:
 	@echo "Restarting services..."
