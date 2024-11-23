@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://i.imgur.com/uky5Etv.png" width="120" alt="Plant Assistant"/>
+  <img src="https://i.imgur.com/75FqnJs.png" width="180" alt="Plant Assistant"/>
 </p>
 
 <h1 align="center">🌱 Plant Assistant 🌱</h1>
