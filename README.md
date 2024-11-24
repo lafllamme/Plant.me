@@ -14,7 +14,6 @@
   <a href="https://github.com/lafllamme/Plant.me/pulls"><img src="https://img.shields.io/github/issues-pr/lafllamme/Plant.me" alt="Open Pull Requests"></a>
   <a href="https://github.com/lafllamme/Plant.me"><img src="https://img.shields.io/github/license/lafllamme/Plant.me" alt="License"></a>
   <a href="https://github.com/ollama/ollama"><img src="https://img.shields.io/badge/Ollama-GitHub-blue" alt="Ollama GitHub"></a>
-  <a href="https://github.com/lafllamme/Plant.me/actions"><img src="https://github.com/lafllamme/Plant.me/workflows/CI/badge.svg" alt="CI Status"></a>
 </p>
 
 ## 🛠 Prerequisites
