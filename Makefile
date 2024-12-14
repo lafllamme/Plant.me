@@ -20,7 +20,7 @@ build-no-cache:
 	$(COMPOSE) build --no-cache
 
 # Bring up the services with build
-upb:
+upp:
 	@echo "Bringing up services with build..."
 	$(COMPOSE) up --build -d
 
