@@ -21,6 +21,14 @@ run_health_check(){
   /scripts/health_check.sh
 }
 
+# Run the setup script to initialize environment variables if needed
+if [ ! -f ".env" ]; then
+  echo "[Entrypoint] $(date +"%d-%m-%Y %H:%M:%S") | .env not found. Running setup.sh..."
+  /scripts/setup.sh
+else
+  echo "[Entrypoint] $(date +"%d-%m-%Y %H:%M:%S") | .env file already exists. Skipping setup."
+fi
+
 # Start the Ollama server in the background
 ollama serve &
 OLLAMA_PID=$!
