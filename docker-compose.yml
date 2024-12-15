@@ -12,8 +12,8 @@ services:
     volumes:
       - ollama:/root/.ollama
     environment:
-      - OLLAMA_API_KEY=${OLLAMA_API_KEY}
-      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3.2}
+      - OLLAMA_API_KEY=${OLLAMA_API_KEY:-YOUR_API_KEY}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-mistral}
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "/scripts/health_check.sh" ]
