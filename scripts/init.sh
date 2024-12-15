@@ -11,8 +11,8 @@ get_time(){
   date +"%d-%m-%Y %H:%M:%S"
 }
 
-# Ask for user input (only when .env is not present in the root directory)
-if [ ! -f "/.env" ]; then
+# Check if .env or .env.local exists
+if [ ! -f ".env" ] && [ ! -f ".env.local" ]; then
   echo "${GREEN}[Init]$(get_time)${NC}: .env file not found. Running setup..."
 
   # Ask for HF API token
@@ -30,21 +30,21 @@ if [ ! -f "/.env" ]; then
   read -r OLLAMA_MODEL
   : "${OLLAMA_MODEL:="mistral"}"  # Default if no input
 
-  # Create the .env file in the root directory
+  # Create the .env file
   echo "${GREEN}[Init]$(get_time)${NC}: Creating .env file..."
-  echo "HF_API_TOKEN=$HF_API_TOKEN" > /.env
-  echo "OLLAMA_API_KEY=$OLLAMA_API_KEY" >> /.env
-  echo "OLLAMA_MODEL=$OLLAMA_MODEL" >> /.env
+  echo "HF_API_TOKEN=$HF_API_TOKEN" > .env
+  echo "OLLAMA_API_KEY=$OLLAMA_API_KEY" >> .env
+  echo "OLLAMA_MODEL=$OLLAMA_MODEL" >> .env
   echo "${GREEN}[Init]$(get_time)${NC}: .env file created successfully."
 
   # Final confirmation with a green checkmark emoji and file content
   echo "${GREEN}✅ Setup Complete!$(get_time)"
   echo "${GREEN}Here is the content of your .env file:${NC}"
-  cat /.env
+  cat .env
 else
-  echo "${GREEN}[Init]$(get_time)${NC}: .env file already exists. Skipping setup."
+  echo "${GREEN}[Init]$(get_time)${NC}: .env or .env.local file already exists. Skipping setup."
   echo "Current .env content:"
-  cat /.env
+  cat .env
 fi
 
 # Run the main application or any other required tasks
