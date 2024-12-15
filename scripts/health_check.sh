@@ -4,6 +4,7 @@
 GREEN="\033[0;32m"
 YELLOW="\033[1;33m"
 RED="\033[0;31m"
+BLUE="\033[0;34m"
 NC="\033[0m" # No Color
 
 # Base URL of the API
@@ -28,7 +29,7 @@ health_check(){
 
   # Log health check status
   if [ "$response" -eq 200 ]; then
-    echo "[${GREEN}✅ health_check${NC}] (${endpoint} // $time) | ${GREEN}STATUS OK${NC} - HTTP Code: ${response}"
+    echo "[${BLUE}✅ health_check${NC}] (${endpoint} // $time) | ${GREEN}STATUS OK${NC} - HTTP Code: ${response}"
     echo "Response (formatted):"
     echo "$body" | jq .
   else
