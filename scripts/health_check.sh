@@ -9,11 +9,11 @@
 
 # Documentation: https://github.com/ollama/ollama/blob/main/docs/api.md
 
-# Define color nodes using tput
-GREEN=$(tput setaf 2)
-YELLOW=$(tput setaf 3)
-RED=$(tput setaf 1)
-NC=$(tput sgr0) # No Color
+# Define color codes (we will just print plain text)
+GREEN="\033[0;32m"
+YELLOW="\033[1;33m"
+RED="\033[0;31m"
+NC="\033[0m" # No Color
 
 # Base URL of the API
 BASE_URL="http://localhost:11434"
@@ -37,18 +37,12 @@ health_check(){
 
   # Log health check status
   if [ "$response" -eq 200 ]; then
-    printf "[%shealth_check%s] (%s // %s) | %sSTATUS OK%s - HTTP Code: %s\n" \
-      "$GREEN" "$NC" "$endpoint" "$time" "$GREEN" "$NC" "$response"
-
-    # Pretty format the JSON response using jq
-    printf "Response (formatted):\n"
+    echo "[${GREEN}health_check${NC}] (${endpoint} // $time) | ${GREEN}STATUS OK${NC} - HTTP Code: ${response}"
+    echo "Response (formatted):"
     echo "$body" | jq .
   else
-    printf "[%shealth_check%s] (%s // %s) | %sSTATUS FAIL%s - HTTP Code: %s\n" \
-      "$RED" "$NC" "$endpoint" "$time" "$RED" "$NC" "$response"
-
-    # Print the body content of the response (pretty printed)
-    printf "Response (formatted):\n"
+    echo "[${RED}health_check${NC}] (${endpoint} // $time) | ${RED}STATUS FAIL${NC} - HTTP Code: ${response}"
+    echo "Response (formatted):"
     echo "$body" | jq .
   fi
 
