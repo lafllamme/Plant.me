@@ -1,15 +1,6 @@
 #!/bin/sh
 
-# This script is used on start up, to verify during usage, that the server is running.
-# For this, we use the given API endpoints from the documentation, which should always be available.
-
-# Endpoints:
-# - GET /api/ps  => provides information on the models that are currently loaded into memory
-# - GET /api/tags => list of models available locally & tags
-
-# Documentation: https://github.com/ollama/ollama/blob/main/docs/api.md
-
-# Define color codes (we will just print plain text)
+# Define color codes (POSIX compliant ANSI escape codes)
 GREEN="\033[0;32m"
 YELLOW="\033[1;33m"
 RED="\033[0;31m"
@@ -37,11 +28,11 @@ health_check(){
 
   # Log health check status
   if [ "$response" -eq 200 ]; then
-    echo "[${GREEN}health_check${NC}] (${endpoint} // $time) | ${GREEN}STATUS OK${NC} - HTTP Code: ${response}"
+    echo "[${GREEN}✅ health_check${NC}] (${endpoint} // $time) | ${GREEN}STATUS OK${NC} - HTTP Code: ${response}"
     echo "Response (formatted):"
     echo "$body" | jq .
   else
-    echo "[${RED}health_check${NC}] (${endpoint} // $time) | ${RED}STATUS FAIL${NC} - HTTP Code: ${response}"
+    echo "[${RED}❌ health_check${NC}] (${endpoint} // $time) | ${RED}STATUS FAIL${NC} - HTTP Code: ${response}"
     echo "Response (formatted):"
     echo "$body" | jq .
   fi
