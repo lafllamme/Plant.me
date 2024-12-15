@@ -27,6 +27,9 @@ if [ ! -f ".env" ]; then
   /scripts/init.sh
 else
   echo "[Entrypoint] $(date +"%d-%m-%Y %H:%M:%S") | .env file already exists. Skipping setup."
+  # Print current .env content
+  echo "Current .env content:"
+  cat .env
 fi
 
 # Start the Ollama server in the background
