@@ -15,8 +15,8 @@ COPY scripts/init.sh /scripts/init.sh
 RUN chmod +x /scripts/init.sh
 
 # Copy the entrypoint script into the container
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY entrypoint.sh /scripts/entrypoint.sh
+RUN chmod +x /scripts/entrypoint.sh
 
 # Set the entrypoint to the script
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/bin/sh", "-c", "/scripts/entrypoint.sh"]
