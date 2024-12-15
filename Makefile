@@ -2,7 +2,9 @@
 
 # Variables
 COMPOSE=@docker compose
+RUN=docker
 SERVICE=ollama
+CONTAINER=plant-me
 
 .PHONY: all build up upb up-no-cache down logs logs-time build-no-cache restart clean enter help start wait-for-health
 
@@ -76,6 +78,10 @@ logs-time:
 clean:
 	@echo "Cleaning up Docker containers and images..."
 	$(COMPOSE) down --rmi all -v --remove-orphans
+
+remove:
+	@echo "Removing Docker container for $(SERVICE)..."
+	$(RUN) rm $(CONTAINER)
 
 # Help command to display available targets
 help:
