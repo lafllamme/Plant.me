@@ -24,7 +24,7 @@ run_health_check(){
 # Run the setup script to initialize environment variables if needed
 if [ ! -f ".env" ] && [ ! -f ".env.local" ]; then
   echo "[${BLUE}🚀 Entrypoint${NC}] $(get_time) | ${YELLOW}.env file not found. Running init.sh...${NC}"
-  /scripts/init.sh
+  /scripts/create.sh
 else
   echo "[${BLUE}✅ Entrypoint${NC}] $(get_time) | ${GREEN}.env file already exists. Skipping setup.${NC}"
   # Print current .env content
