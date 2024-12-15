@@ -10,12 +10,8 @@ RUN mkdir /scripts
 COPY scripts/health_check.sh /scripts/health_check.sh
 RUN chmod +x /scripts/health_check.sh
 
-# Copy the init script into the container
-COPY scripts/init.sh /scripts/init.sh
-RUN chmod +x /scripts/init.sh
-
 # Copy the entrypoint script into the container
-COPY entrypoint.sh /scripts/entrypoint.sh
+COPY scripts/entrypoint.sh /scripts/entrypoint.sh
 RUN chmod +x /scripts/entrypoint.sh
 
 # Set the entrypoint to the script
