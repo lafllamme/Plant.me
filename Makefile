@@ -16,19 +16,17 @@ all: help
 build:
 	@echo "Building the Docker image..."
 	$(COMPOSE) build
-	@MAKE init
 # Build without cache
 build-no-cache:
 	@echo "Building the Docker image without cache..."
 	$(COMPOSE) build --no-cache
-	@MAKE init
 
 
 # Bring up the services with build
 upp:
 	@echo "Bringing up services with build..."
+	@MAKE down
 	@MAKE build
-	@MAKE init
 	$(COMPOSE) up
 
 # Bring up the services without using cache
@@ -108,4 +106,5 @@ help:
 # Initialize .env and .env.local files
 init:
 	@echo "Running the initialization script to set up environment variables interactively..."
-	docker-compose run --rm $(SERVICE) /scripts/init.sh
+	chmod +x ./scripts/create.sh
+	@./scripts/create.sh
