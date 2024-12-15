@@ -2,9 +2,12 @@
 
 # Variables
 COMPOSE=@docker compose
+RUN=docker
 SERVICE=ollama
+CONTAINER=plant-me
+IMAGE_NAME=plant-me-image
 
-.PHONY: all build up upb up-no-cache down logs logs-time build-no-cache restart clean enter help start wait-for-health
+.PHONY: all build up upb up-no-cache down logs logs-time build-no-cache restart clean enter help start wait-for-health init
 
 # Default target
 all: help
@@ -13,16 +16,18 @@ all: help
 build:
 	@echo "Building the Docker image..."
 	$(COMPOSE) build
-
 # Build without cache
 build-no-cache:
 	@echo "Building the Docker image without cache..."
 	$(COMPOSE) build --no-cache
 
+
 # Bring up the services with build
 upp:
 	@echo "Bringing up services with build..."
-	$(COMPOSE) up --build -d
+	@MAKE down
+	@MAKE build
+	$(COMPOSE) up
 
 # Bring up the services without using cache
 up-no-cache:
@@ -45,7 +50,6 @@ wait-for-health:
 		echo "Still waiting..."; \
 	done
 	@echo "Ollama service is up and running!"
-
 
 # Enter the container's shell
 enter:
@@ -77,6 +81,10 @@ clean:
 	@echo "Cleaning up Docker containers and images..."
 	$(COMPOSE) down --rmi all -v --remove-orphans
 
+remove:
+	@echo "Removing Docker container for $(SERVICE)..."
+	$(RUN) rm $(CONTAINER)
+
 # Help command to display available targets
 help:
 	@echo "Available Makefile targets:"
@@ -93,3 +101,10 @@ help:
 	@echo "  clean             Remove containers, images, volumes, and orphans."
 	@echo "  enter             Enter the container's shell."
 	@echo "  help              Show this help message."
+	@echo "  init              Set up the .env and .env.local files interactively."
+
+# Initialize .env and .env.local files
+init:
+	@echo "Running the initialization script to set up environment variables interactively..."
+	chmod +x ./scripts/create.sh
+	@./scripts/create.sh

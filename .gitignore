@@ -2,6 +2,8 @@
 
 #IDE
 .env
+.env.local
+
 .idea
 /*.iml
 
