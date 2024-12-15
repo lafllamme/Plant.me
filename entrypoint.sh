@@ -76,7 +76,7 @@ curl -X POST http://localhost:11434/api/generate -d "{\"model\": \"$OLLAMA_MODEL
 # Run the health check in the background every 30 seconds
 while true; do
   run_health_check
-  sleep 30
+  sleep 60
 done &
 
 # Wait for the Ollama server to continue running
