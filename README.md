@@ -30,7 +30,12 @@ Make sure you have the following installed:
 
     ```bash
     git clone https://github.com/lafllamme/Plant.me.git
-    cd Plant.me
+    cd Plant.me1. 
+2. **Run the create.sh for the environment files:**
+
+    ```bash
+    chmod +x scripts/create.sh
+    scripts/create.sh
     ```
 
 2. **Create a `.env` File for Environment Variables:**
